@@ -9,41 +9,30 @@ class Neuron:
         self.bias = np.random.random()
         self.output = 0
 
-
-
-    def forward(self, inputs):
-        self.output = 0
-
-        for input, weight in zip(inputs, self.weights):
-            self.output += input * weight
-
-        self.output += self.bias
+    def calc_output(self, inputs):
+        self.output = np.dot(self.weights, inputs) + self.bias
 
         return self.output
     
-
-
 class Layer:
-
     def __init__(self, num_inputs, num_neurons):
-
         self.num_inputs = num_inputs
-
         self.num_neurons = num_neurons
 
-        self.neurons = [Neuron(num_inputs) for _ in range(num_neurons)]
+        # Creating the neurons
+        self.neurons = []
+        for _ in range(self.num_neurons):
+            neuron = Neuron(self.num_inputs)
+            self.neurons.append(neuron)
 
         self.outputs = []
 
-    def forward(self, inputs):
-        self.outputs = [neuron.forward(inputs) for neuron in self.neurons]
+    def gen_outputs(self, inputs):
+        self.outputs = [neuron.calc_output(inputs) for neuron in self.neurons]
 
         return self.outputs
-
-
-
+    
 class NeuralNetwork:
-
     def __init__(self, num_inputs, num_hidden_layers, num_hidden_layer_neurons, num_output_layer_neurons):
         self.num_inputs = num_inputs
         self.num_hidden_layers = num_hidden_layers
@@ -63,23 +52,14 @@ class NeuralNetwork:
         output_layer = Layer(num_inputs=input_size, num_neurons=num_output_layer_neurons)
         self.layers.append(output_layer)
 
-
-
     def forward(self, inputs):
 
-        # Take the inputs and pass those inputs to each layer in the network
-
-        # Tip, use a for loop and one variable to keep track of the outputs of a single layer
-
-        # Keep updating that single variable with the outputs of the layers
-
-        # At the end, whatever is in that variable will be the output of the last layer
-        output = inputs
+        layer_inputs = inputs
         for layer in self.layers:
-            layer.forward(output)
-            output = layer.outputs
+            layer_output = layer.gen_outputs(layer_inputs)
+            layer_inputs = layer_output
 
-        return output
+        return layer_inputs
 
 
 inputs = [4, 3, 7]
